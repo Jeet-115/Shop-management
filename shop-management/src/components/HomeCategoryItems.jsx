@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaChevronDown, FaChevronUp, FaMinus, FaPlus } from "react-icons/fa";
 import { updateItemQuantity } from "../services/homeService";
 
-export default function HomeCategoryList({
+export default function HomeCategoryItems({
   categories,
   itemsByCategory,
   setItemsByCategory,

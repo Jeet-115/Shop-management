@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaWarehouse } from "react-icons/fa";
 
 import EditButton from "../components/EditButton";
-import HomeCategoryList from "../components/homeCategoryList";
+import HomeCategoryItems from "../components/HomeCategoryItems";
 import AdminLoginModal from "../components/AdminLoginModal";
 import OrdersLink from "../components/OrdersLink";
 import { fetchCategories, fetchItems } from "../services/homeService";
@@ -72,7 +72,7 @@ export default function Home() {
             transition={{ delay: 0.9, duration: 0.5 }}
             className="space-y-12"
           >
-            <HomeCategoryList
+            <HomeCategoryItems
               categories={categories}
               itemsByCategory={itemsByCategory}
               setItemsByCategory={setItemsByCategory}
