@@ -8,18 +8,25 @@ export default function AdminLoginModal({ onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const { token } = await loginAdmin({ email, password });
       localStorage.setItem("token", token);
-      navigate("/admin");
+
+      // Small delay for animation effect
+      setTimeout(() => {
+        navigate("/admin");
+      }, 500);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
+      setLoading(false);
     }
   };
 
@@ -44,7 +51,8 @@ export default function AdminLoginModal({ onClose }) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+            disabled={loading}
+            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none disabled:opacity-50"
             aria-label="Close login modal"
             type="button"
           >
@@ -64,11 +72,12 @@ export default function AdminLoginModal({ onClose }) {
               <input
                 type="email"
                 placeholder="Email"
-                className="border border-gray-300 rounded-md pl-10 pr-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-md pl-10 pr-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                disabled={loading}
               />
             </div>
 
@@ -77,11 +86,12 @@ export default function AdminLoginModal({ onClose }) {
               <input
                 type="password"
                 placeholder="Password"
-                className="border border-gray-300 rounded-md pl-10 pr-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-md pl-10 pr-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                disabled={loading}
               />
             </div>
 
@@ -95,16 +105,49 @@ export default function AdminLoginModal({ onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 transition font-medium"
+                disabled={loading}
+                className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 transition font-medium disabled:opacity-50"
               >
                 Cancel
               </button>
+
               <motion.button
-                whileTap={{ scale: 0.95 }}
+                whileTap={!loading ? { scale: 0.95 } : {}}
                 type="submit"
-                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
+                disabled={loading}
+                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Login
+                {!loading ? (
+                  "Login"
+                ) : (
+                  <motion.div
+                    className="flex gap-1"
+                    initial="start"
+                    animate="end"
+                    variants={{
+                      start: { transition: { staggerChildren: 0.1 } },
+                      end: { transition: { staggerChildren: 0.1 } },
+                    }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="w-2 h-2 bg-white rounded-full"
+                        variants={{
+                          start: { y: "0%" },
+                          end: {
+                            y: ["0%", "-50%", "0%"],
+                            transition: {
+                              duration: 0.5,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            },
+                          },
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                )}
               </motion.button>
             </div>
           </form>
