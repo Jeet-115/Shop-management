@@ -20,7 +20,7 @@ connectDB();
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://santcorporation.vercel.app/"
+  "https://santcorporation.vercel.app"
 ];
 
 app.use(
