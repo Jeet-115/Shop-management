@@ -21,7 +21,7 @@ connectDB();
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://santcorporation.vercel.app"
+  "https://santcorporation.vercel.app",
 ];
 
 app.use(
@@ -70,11 +70,21 @@ app.use((err, req, res, next) => {
 });
 
 // ====== CRON JOB TO RESET ITEM QUANTITIES EVERY HOUR ======
-cron.schedule("0 * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
   try {
-    console.log("⏳ Resetting all item quantities to 0 at", new Date().toLocaleString());
-    await Item.updateMany({}, { $set: { quantity: 0 } });
-    console.log("✅ All quantities reset successfully");
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    console.log("⏳ Checking items to reset at", new Date().toLocaleString());
+
+    // Only reset items whose updatedAt is more than 1 hour old
+    const result = await Item.updateMany(
+      { updatedAt: { $lt: oneHourAgo }, quantity: { $gt: 0 } },
+      { $set: { quantity: 0 } }
+    );
+
+    if (result.modifiedCount > 0) {
+      console.log(`✅ Reset ${result.modifiedCount} item(s) to quantity 0`);
+    }
   } catch (error) {
     console.error("❌ Error resetting quantities:", error);
   }
