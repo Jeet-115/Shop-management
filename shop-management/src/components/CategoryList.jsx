@@ -372,41 +372,25 @@ export default function CategoryList({ categories, setCategories }) {
                                 <FaEdit className="text-green-600" size={16} />
                               </motion.button>
 
-                              <motion.button
-                                onClick={() =>
-                                  updateItemQuantity(
-                                    item._id,
-                                    item.quantity - 1,
-                                    cat._id
-                                  )
-                                }
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                aria-label="Decrease Quantity"
-                                className="p-2 rounded hover:bg-red-200 text-red-600 transition select-none"
-                              >
-                                <FaMinus />
-                              </motion.button>
-
-                              <span className="w-8 text-center font-mono">
-                                {item.quantity}
-                              </span>
-
-                              <motion.button
-                                onClick={() =>
-                                  updateItemQuantity(
-                                    item._id,
-                                    item.quantity + 1,
-                                    cat._id
-                                  )
-                                }
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                aria-label="Increase Quantity"
-                                className="p-2 rounded hover:bg-green-200 text-green-600 transition select-none"
-                              >
-                                <FaPlus />
-                              </motion.button>
+                              {/* Quantity Input */}
+                              <input
+                                type="number"
+                                className="w-16 p-1 text-center border rounded font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={item.quantity}
+                                min="0"
+                                onFocus={(e) => e.target.select()} // Select all on click/focus
+                                onChange={(e) => {
+                                  const newQty = parseInt(e.target.value, 10);
+                                  if (!isNaN(newQty) && newQty >= 0) {
+                                    updateItemQuantity(
+                                      item._id,
+                                      newQty,
+                                      cat._id
+                                    );
+                                  }
+                                }}
+                                onClick={(e) => e.stopPropagation()} // Prevent toggle
+                              />
 
                               <motion.button
                                 onClick={() =>

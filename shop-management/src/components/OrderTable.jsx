@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaMinus, FaPlus } from "react-icons/fa";
 
 export default function OrderTable({ categories, updateQuantity }) {
   return (
@@ -27,38 +26,20 @@ export default function OrderTable({ categories, updateQuantity }) {
                   <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                     <td className="border p-3 text-sm sm:text-base">{item.name}</td>
                     <td className="border p-3 text-center">
-                      <div className="flex items-center justify-center gap-3">
-                        <motion.button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1, category._id)
-                          }
-                          disabled={item.quantity <= 0}
-                          whileHover={{ scale: item.quantity > 0 ? 1.1 : 1 }}
-                          whileTap={{ scale: item.quantity > 0 ? 0.95 : 1 }}
-                          className={`flex items-center justify-center w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition`}
-                          aria-label={`Decrease quantity of ${item.name}`}
-                          type="button"
-                        >
-                          <FaMinus />
-                        </motion.button>
-
-                        <span className="min-w-[30px] text-center text-sm sm:text-base font-medium">
-                          {item.quantity}
-                        </span>
-
-                        <motion.button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1, category._id)
-                          }
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex items-center justify-center w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 transition"
-                          aria-label={`Increase quantity of ${item.name}`}
-                          type="button"
-                        >
-                          <FaPlus />
-                        </motion.button>
-                      </div>
+                      <input
+                        type="number"
+                        className="w-16 text-center border rounded p-1 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        value={item.quantity}
+                        min="0"
+                        onClick={(e) => e.target.select()}
+                        onChange={(e) =>
+                          updateQuantity(
+                            item._id,
+                            Number(e.target.value),
+                            category._id
+                          )
+                        }
+                      />
                     </td>
                   </tr>
                 ))}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaChevronDown, FaChevronUp, FaMinus, FaPlus } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { updateItemQuantity } from "../services/homeService";
 
 export default function HomeCategoryItems({
@@ -12,14 +12,16 @@ export default function HomeCategoryItems({
   const [showItems, setShowItems] = useState({});
 
   const updateQuantity = async (itemId, newQty) => {
-    if (newQty < 0) return;
+    if (isNaN(newQty) || newQty < 0) return;
     try {
       const updatedItem = await updateItemQuantity(itemId, newQty);
       setItemsByCategory((prev) => {
         const updated = { ...prev };
         for (const catId in updated) {
           updated[catId] = updated[catId].map((item) =>
-            item._id === itemId ? { ...item, quantity: updatedItem.quantity } : item
+            item._id === itemId
+              ? { ...item, quantity: updatedItem.quantity }
+              : item
           );
         }
         return updated;
@@ -34,20 +36,26 @@ export default function HomeCategoryItems({
   return (
     <div className="space-y-6 max-w-4xl mx-auto px-2 sm:px-0">
       {categories.map((cat) => (
-        <div key={cat._id} className="border rounded-lg p-4 bg-white shadow-sm">
-          <div className="flex justify-between items-center cursor-pointer select-none" onClick={() =>
+        <div
+          key={cat._id}
+          className="border rounded-lg p-4 bg-white shadow-sm"
+        >
+          <div
+            className="flex justify-between items-center cursor-pointer select-none"
+            onClick={() =>
               setShowItems((prev) => ({
                 ...prev,
                 [cat._id]: !prev[cat._id],
               }))
-            }>
+            }
+          >
             <h2 className="text-lg font-semibold text-gray-800">{cat.name}</h2>
             <button
               aria-expanded={!!showItems[cat._id]}
               aria-controls={`items-list-${cat._id}`}
               className="flex items-center gap-1 text-blue-600 font-medium focus:outline-none"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent toggle twice on button click
+                e.stopPropagation();
                 setShowItems((prev) => ({
                   ...prev,
                   [cat._id]: !prev[cat._id],
@@ -89,37 +97,35 @@ export default function HomeCategoryItems({
                       {item.name}
                     </span>
 
-                    <div className="flex items-center gap-2">
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        disabled={item.quantity <= 0}
-                        onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                        className={`p-2 rounded-md text-gray-600 hover:bg-red-200 transition ${
-                          item.quantity <= 0 ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        aria-label={`Decrease quantity of ${item.name}`}
-                        type="button"
-                      >
-                        <FaMinus size={14} />
-                      </motion.button>
-
-                      <span
-                        className="w-8 text-center font-mono text-gray-800 select-none"
-                        aria-live="polite"
-                      >
-                        {item.quantity}
-                      </span>
-
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                        className="p-2 rounded-md text-gray-600 hover:bg-green-200 transition"
-                        aria-label={`Increase quantity of ${item.name}`}
-                        type="button"
-                      >
-                        <FaPlus size={14} />
-                      </motion.button>
-                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.quantity}
+                      onFocus={(e) => e.target.select()} // select all text on click
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10) || 0;
+                        setItemsByCategory((prev) => {
+                          const updated = { ...prev };
+                          for (const catId in updated) {
+                            updated[catId] = updated[catId].map((i) =>
+                              i._id === item._id
+                                ? { ...i, quantity: val }
+                                : i
+                            );
+                          }
+                          return updated;
+                        });
+                      }}
+                      onBlur={(e) =>
+                        updateQuantity(item._id, parseInt(e.target.value, 10) || 0)
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.target.blur(); // triggers onBlur update
+                        }
+                      }}
+                      className="w-16 text-center border rounded-md px-2 py-1 font-mono text-gray-800 focus:outline-none focus:ring focus:border-blue-300"
+                    />
                   </li>
                 ))}
               </motion.ul>
