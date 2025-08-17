@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import cron from "node-cron";
 import Item from "./models/Item.js"; // path corrected to your file
 import session from "express-session";
+import MongoStore from "connect-mongo";
 
 import adminRoutes from "./routes/adminRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -44,11 +45,18 @@ app.use(express.json());
 // session setup
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "supersecretkey",
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // your existing DB
+      ttl: 60 * 60, // session TTL = 1 hour
+    }),
     cookie: {
-      maxAge: 60 * 60 * 1000, // 1 hour expiry
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
