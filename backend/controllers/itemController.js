@@ -9,19 +9,7 @@ export const getItems = async (req, res) => {
     const { categoryId } = req.query;
     const filter = categoryId ? { category: categoryId } : {};
     const items = await Item.find(filter).populate("category", "name");
-
-    // Ensure session.quantities exists
-    if (!req.session.quantities) {
-      req.session.quantities = {};
-    }
-
-    // Merge session-based quantities
-    const merged = items.map((item) => ({
-      ...item.toObject(),
-      quantity: req.session.quantities[item._id] || 0,
-    }));
-
-    res.json(merged);
+    res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -74,18 +62,10 @@ export const updateItemQuantity = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Initialize session quantities if not present
-    if (!req.session.quantities) {
-      req.session.quantities = {};
-    }
+    item.quantity = quantity;
+    const updatedItem = await item.save();
 
-    // Store quantity per-session instead of DB
-    req.session.quantities[item._id] = quantity;
-
-    res.json({
-      ...item.toObject(),
-      quantity: req.session.quantities[item._id],
-    });
+    res.json(updatedItem);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -5,7 +5,6 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import cron from "node-cron";
 import Item from "./models/Item.js"; // path corrected to your file
-import session from "express-session";
 
 import adminRoutes from "./routes/adminRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -41,18 +40,6 @@ app.use(
 
 app.use(express.json());
 
-// session setup
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "supersecretkey",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: 60 * 60 * 1000, // 1 hour expiry
-    },
-  })
-);
-
 // Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -82,26 +69,26 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
 
-// // ====== CRON JOB TO RESET ITEM QUANTITIES EVERY HOUR ======
-// cron.schedule("*/10 * * * *", async () => {
-//   try {
-//     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+// ====== CRON JOB TO RESET ITEM QUANTITIES EVERY HOUR ======
+cron.schedule("*/10 * * * *", async () => {
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-//     console.log("⏳ Checking items to reset at", new Date().toLocaleString());
+    console.log("⏳ Checking items to reset at", new Date().toLocaleString());
 
-//     // Only reset items whose updatedAt is more than 1 hour old
-//     const result = await Item.updateMany(
-//       { updatedAt: { $lt: oneHourAgo }, quantity: { $gt: 0 } },
-//       { $set: { quantity: 0 } }
-//     );
+    // Only reset items whose updatedAt is more than 1 hour old
+    const result = await Item.updateMany(
+      { updatedAt: { $lt: oneHourAgo }, quantity: { $gt: 0 } },
+      { $set: { quantity: 0 } }
+    );
 
-//     if (result.modifiedCount > 0) {
-//       console.log(`✅ Reset ${result.modifiedCount} item(s) to quantity 0`);
-//     }
-//   } catch (error) {
-//     console.error("❌ Error resetting quantities:", error);
-//   }
-// });
+    if (result.modifiedCount > 0) {
+      console.log(`✅ Reset ${result.modifiedCount} item(s) to quantity 0`);
+    }
+  } catch (error) {
+    console.error("❌ Error resetting quantities:", error);
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
