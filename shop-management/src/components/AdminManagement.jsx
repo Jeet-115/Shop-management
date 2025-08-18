@@ -9,9 +9,11 @@ import FileUpload from "./FileUpload";
 import AddCategory from "./AddCategory";
 import AddItem from "./AddItem";
 import CategoryList from "./CategoryList";
+import { resetAllItemQuantities } from "../services/homeService";
 
 export default function AdminManagement() {
   const [categories, setCategories] = useState([]);
+  const [loadingReset, setLoadingReset] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -29,6 +31,21 @@ export default function AdminManagement() {
       setCategories(categoriesWithItems);
     } catch {
       toast.error("Failed to load categories");
+    }
+  };
+
+  const handleResetQuantities = async () => {
+    try {
+      setLoadingReset(true);
+      const response = await resetAllItemQuantities();
+      toast.success(response.message);
+      // Refetch categories and items to update UI
+      fetchCategories();
+    } catch (err) {
+      console.error("Error resetting quantities:", err);
+      toast.error("Failed to reset quantities");
+    } finally {
+      setLoadingReset(false);
     }
   };
 
@@ -83,9 +100,21 @@ export default function AdminManagement() {
         transition={{ duration: 0.4, delay: 0.3 }}
         className={`${sectionClasses} overflow-x-auto`}
       >
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-          Category List
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+            Category List
+          </h2>
+          <motion.button
+            onClick={handleResetQuantities}
+            disabled={loadingReset}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {loadingReset ? "Resetting..." : "Reset Quantities"}
+          </motion.button>
+        </div>
+
         <CategoryList categories={categories} setCategories={setCategories} />
       </motion.div>
     </div>

@@ -16,3 +16,8 @@ export const updateItemQuantity = async (itemId, quantity) => {
   });
   return data;
 };
+
+export const resetAllItemQuantities = async () => {
+  const { data } = await axiosInstance.patch("/api/items/reset-quantities");
+  return data;
+};

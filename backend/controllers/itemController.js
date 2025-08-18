@@ -112,3 +112,21 @@ export const updateItemName = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Reset quantity of all items to 0 (Admin)
+// @route   PATCH /api/items/reset-quantities
+// @access  Private (Admin)
+export const resetAllItemQuantities = async (req, res) => {
+  try {
+    const result = await Item.updateMany(
+      { quantity: { $gt: 0 } }, // only update items with quantity > 0
+      { $set: { quantity: 0 } }
+    );
+
+    res.json({
+      message: `✅ Reset ${result.modifiedCount} item(s) to quantity 0`,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
