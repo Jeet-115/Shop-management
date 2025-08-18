@@ -10,14 +10,18 @@ export const getItems = async (req, res) => {
     const filter = categoryId ? { category: categoryId } : {};
     const items = await Item.find(filter).populate("category", "name");
 
+    // Ensure session.quantities exists
+    if (!req.session.quantities) {
+      req.session.quantities = {};
+    }
+
     // Merge session-based quantities
-    const sessionQuantities = req.session.items || {};
-    const itemsWithSessionQty = items.map(item => ({
+    const merged = items.map((item) => ({
       ...item.toObject(),
-      quantity: sessionQuantities[item._id] || 0,
+      quantity: req.session.quantities[item._id] || 0,
     }));
 
-    res.json(itemsWithSessionQty);
+    res.json(merged);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -60,22 +64,28 @@ export const createItem = async (req, res) => {
 export const updateItemQuantity = async (req, res) => {
   try {
     const { quantity } = req.body;
-    const itemId = req.params.id;
 
     if (quantity == null) {
       return res.status(400).json({ message: "Quantity is required" });
     }
 
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(req.params.id);
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Store in session only
-    if (!req.session.items) req.session.items = {};
-    req.session.items[itemId] = quantity;
+    // Initialize session quantities if not present
+    if (!req.session.quantities) {
+      req.session.quantities = {};
+    }
 
-    res.json({ ...item.toObject(), quantity });
+    // Store quantity per-session instead of DB
+    req.session.quantities[item._id] = quantity;
+
+    res.json({
+      ...item.toObject(),
+      quantity: req.session.quantities[item._id],
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

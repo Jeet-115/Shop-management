@@ -10,57 +10,48 @@ import PDFDocument from "pdfkit";
 // @access  Public
 export const getAvailableItemsForOrder = async (req, res) => {
   try {
-    const items = await Item.find(); // base items
-    const sessionQuantities = req.session.items || {};
+    // Find all items with quantity > 0, and populate category
+    const items = await Item.find({ quantity: { $gt: 0 } })
+      .populate("category", "name")
+      .sort({ "category.name": 1, name: 1 });
 
-    const availableItems = items
-      .filter((item) => (sessionQuantities[item._id] || 0) > 0)
-      .map((item) => ({
-        ...item.toObject(),
-        quantity: sessionQuantities[item._id] || 0,
-      }));
+    // Group items by category
+    const categoryMap = {};
+    items.forEach((item) => {
+      const catName = item.category?.name || "Uncategorized";
+      if (!categoryMap[catName]) {
+        categoryMap[catName] = [];
+      }
+      categoryMap[catName].push({
+        id: item._id,
+        name: item.name,
+        quantity: item.quantity,
+      });
+    });
 
-    res.json(availableItems);
+    // Transform into array
+    const result = Object.keys(categoryMap).map((catName) => ({
+      category: catName,
+      items: categoryMap[catName],
+    }));
+
+    res.json(result);
   } catch (error) {
+    console.error("Error fetching available items:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Place order based on session quantities
-// @route   POST /api/orders
-// @access  Public
 export const placeOrder = async (req, res) => {
   try {
-    const { email, message } = req.body;
-    const sessionQuantities = req.session.items || {}; // FIXED ✅
+    const { email, message, items } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+    if (!email || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Invalid order data" });
     }
 
-    // Get item IDs with quantity > 0
-    const itemIds = Object.keys(sessionQuantities).filter(
-      (id) => sessionQuantities[id] > 0
-    );
-
-    if (itemIds.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No items selected for the order" });
-    }
-
-    // Fetch items from DB
-    const items = await Item.find({ _id: { $in: itemIds } });
-
-    // Build order items array
-    const orderItems = items.map((item) => ({
-      category: item.category,
-      name: item.name,
-      quantity: sessionQuantities[item._id.toString()],
-    }));
-
-    // Save order in DB
-    const newOrder = await Order.create({ email, message, items: orderItems });
+    // Save order to DB
+    const newOrder = await Order.create({ email, message, items });
 
     const now = new Date();
     const timestamp = now.toLocaleString();
@@ -362,13 +353,11 @@ Phone: +1 (555) 123-4567
 
 export const resetAllItemQuantities = async (req, res) => {
   try {
-    // Clear session items
-    req.session.items = {};
-
-    res.json({ message: "All session item quantities reset to 0" });
+    await Item.updateMany({}, { $set: { quantity: 0 } });
+    res.json({ message: "All item quantities reset to 0" });
   } catch (error) {
-    console.error("Error resetting session quantities:", error);
-    res.status(500).json({ message: "Failed to reset session item quantities" });
+    console.error("Error resetting quantities:", error);
+    res.status(500).json({ message: "Failed to reset item quantities" });
   }
 };
 
@@ -377,7 +366,10 @@ export const resetAllItemQuantities = async (req, res) => {
 // @access  Admin
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
+    const orders = await Order.find()
+      .sort({ createdAt: -1 }) // latest first
+      .lean();
+
     res.json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
