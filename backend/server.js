@@ -70,15 +70,15 @@ app.use((err, req, res, next) => {
 });
 
 // ====== CRON JOB TO RESET ITEM QUANTITIES EVERY HOUR ======
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
   try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
     console.log("⏳ Checking items to reset at", new Date().toLocaleString());
 
-    // Only reset items whose updatedAt is more than 1 hour old
+    // Only reset items whose updatedAt is more than 30 minutes old
     const result = await Item.updateMany(
-      { updatedAt: { $lt: oneHourAgo }, quantity: { $gt: 0 } },
+      { updatedAt: { $lt: thirtyMinutesAgo }, quantity: { $gt: 0 } },
       { $set: { quantity: 0 } }
     );
 
