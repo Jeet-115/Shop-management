@@ -323,8 +323,8 @@ Phone: +1 (555) 123-4567
 
           <p>Thank you,<br/>
           <strong>SANT CORPORATION</strong><br/>
-          Email: support@santcorporation.com<br/>
-          Phone: +1 (555) 123-4567</p>
+          Email: Jireshpatel@yahoo.com <br/>
+          Phone: +17577751300 </p>
         </td>
       </tr>
 
