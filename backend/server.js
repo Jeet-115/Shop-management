@@ -23,36 +23,40 @@ connectDB();
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://santcorporation.vercel.app", // ✅ your deployed frontend
+  "https://santcorporation.vercel.app",
 ];
 
-// Middleware: CORS
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true, // ✅ allow cookies
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("❌ CORS blocked for origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
 app.use(express.json());
 
-// ===== Session setup =====
-app.set("trust proxy", 1); // ✅ needed when using Render/Heroku behind proxy
-
+// session setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
+      mongoUrl: process.env.MONGO_URI, // your existing DB
       ttl: 60 * 60, // session TTL = 1 hour
     }),
     cookie: {
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
       httpOnly: true,
-      secure: true, // ✅ must be true since you're on HTTPS
-      sameSite: "none", // ✅ required for cross-site cookies (Vercel ↔ Render)
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
