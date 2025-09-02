@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import AdminManagement from "../components/AdminManagement";
 import OrderHistory from "../components/OrderHistory";
+import LogoutButton from "../components/LogoutButton";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("management");
@@ -19,7 +20,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-3 sm:py-10 sm:px-4">
       <div className="max-w-6xl mx-auto bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
         
-        {/* Title with Back Button */}
+        {/* Title with Back + Logout Buttons */}
         <motion.div
           className="flex items-center justify-between mb-6 sm:mb-8"
           initial={{ opacity: 0, y: -20 }}
@@ -29,18 +30,23 @@ export default function AdminDashboard() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
             Admin Dashboard
           </h1>
-          
-          <motion.button
-            onClick={() => navigate("/")}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md text-sm sm:text-base font-semibold select-none"
-            aria-label="Go back to Home"
-            type="button"
-          >
-            <FaArrowLeft size={18} />
-            Back
-          </motion.button>
+
+          <div className="flex gap-3">
+            <motion.button
+              onClick={() => navigate("/")}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md text-sm sm:text-base font-semibold select-none"
+              aria-label="Go back to Home"
+              type="button"
+            >
+              <FaArrowLeft size={18} />
+              Back
+            </motion.button>
+
+            {/* ✅ Logout button added here */}
+            <LogoutButton />
+          </div>
         </motion.div>
 
         {/* Tab Navigation */}

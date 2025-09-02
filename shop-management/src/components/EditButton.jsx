@@ -6,13 +6,19 @@ export default function EditButton({ onLoginRequired }) {
   const navigate = useNavigate();
 
   const handleEditClick = () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/admin");
-    } else {
+  const authData = localStorage.getItem("auth");
+  if (authData) {
+    const { expiry } = JSON.parse(authData);
+    if (Date.now() > expiry) {
+      localStorage.removeItem("auth");
       onLoginRequired();
+      return;
     }
-  };
+    navigate("/admin");
+  } else {
+    onLoginRequired();
+  }
+};
 
   return (
     <motion.button

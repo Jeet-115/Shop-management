@@ -1,14 +1,27 @@
-import React from "react";
 import { Navigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const authData = localStorage.getItem("auth");
 
-  if (!token) {
-    // No token, redirect to home page
+  if (!authData) {
+    // No auth object stored
     return <Navigate to="/" replace />;
   }
 
-  // Token found, render the children components (Admin)
-  return children;
+  try {
+    const { token, expiry } = JSON.parse(authData);
+
+    // Check if token exists and is not expired
+    if (!token || Date.now() > expiry) {
+      localStorage.removeItem("auth");
+      return <Navigate to="/" replace />;
+    }
+
+    // ✅ Valid token, allow access
+    return children;
+  } catch {
+    // If parsing fails, clear and redirect
+    localStorage.removeItem("auth");
+    return <Navigate to="/" replace />;
+  }
 }

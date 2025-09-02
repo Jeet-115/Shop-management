@@ -12,23 +12,26 @@ export default function AdminLoginModal({ onClose }) {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const { token } = await loginAdmin({ email, password });
-      localStorage.setItem("token", token);
+  try {
+    const { token } = await loginAdmin({ email, password });
 
-      // Small delay for animation effect
-      setTimeout(() => {
-        navigate("/admin");
-      }, 500);
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-      setLoading(false);
-    }
-  };
+    // Save token with expiry metadata
+    const expiryTime = Date.now() + 24 * 60 * 60 * 1000; // 1 day from now
+    localStorage.setItem("auth", JSON.stringify({ token, expiry: expiryTime }));
+
+    // Small delay for animation effect
+    setTimeout(() => {
+      navigate("/admin");
+    }, 500);
+  } catch (err) {
+    setError(err.response?.data?.message || "Login failed");
+    setLoading(false);
+  }
+};
 
   return (
     <AnimatePresence>

@@ -5,10 +5,19 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authData = localStorage.getItem("auth");
+
+  if (authData) {
+    const { token, expiry } = JSON.parse(authData);
+
+    // If expired, remove from localStorage
+    if (Date.now() > expiry) {
+      localStorage.removeItem("auth");
+    } else {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
+
   return config;
 });
 
