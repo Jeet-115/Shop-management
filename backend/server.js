@@ -11,6 +11,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import itemRoutes from "./routes/itemRoutes.js";
 import excelRoutes from "./routes/excelRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import payListRoutes from "./routes/payListRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/excel", excelRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/paylist", payListRoutes);
 
 // Logger for dev
 if (process.env.NODE_ENV !== "production") {

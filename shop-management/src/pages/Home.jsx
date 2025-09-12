@@ -6,6 +6,7 @@ import EditButton from "../components/EditButton";
 import HomeCategoryItems from "../components/HomeCategoryItems";
 import AdminLoginModal from "../components/AdminLoginModal";
 import OrdersLink from "../components/OrdersLink";
+import PayListButton from "../components/PayListButton";
 import {
   fetchCategories,
   fetchItems,
@@ -84,6 +85,11 @@ export default function Home() {
             {/* Edit Button */}
             <motion.div className="w-full sm:w-auto">
               <EditButton onLoginRequired={() => setShowModal(true)} />
+            </motion.div>
+
+            {/* Pay List Button */}
+            <motion.div className="w-full sm:w-auto">
+              <PayListButton onLoginRequired={() => setShowModal(true)} />
             </motion.div>
 
             {/* Reset Quantities Button */}
