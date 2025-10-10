@@ -4,10 +4,17 @@ import {
   addPayListEntryApi,
   togglePayListDeleteApi,
   deletePayListApi,
+  fetchTotalAmountApi,
 } from "../services/payListService";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaTrash, FaCheckCircle, FaTimes, FaArrowLeft } from "react-icons/fa";
+import {
+  FaPlus,
+  FaTrash,
+  FaCheckCircle,
+  FaTimes,
+  FaArrowLeft,
+} from "react-icons/fa";
 
 export default function PayList() {
   const [payList, setPayList] = useState([]);
@@ -20,6 +27,7 @@ export default function PayList() {
     paidTo: "",
     amount: "",
   });
+  const [totalAmount, setTotalAmount] = useState(0);
 
   // Fetch pay list entries
   const loadPayList = async () => {
@@ -34,8 +42,18 @@ export default function PayList() {
     }
   };
 
+  const loadTotalAmount = async () => {
+    try {
+      const { totalAmount } = await fetchTotalAmountApi();
+      setTotalAmount(totalAmount);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     loadPayList();
+    loadTotalAmount();
   }, []);
 
   // Handle form input change
@@ -67,8 +85,9 @@ export default function PayList() {
   // Toggle soft delete
   const handleToggleDelete = async (id) => {
     try {
-      await togglePayListDeleteApi(id);
-      loadPayList();
+      const { totalAmount } = await togglePayListDeleteApi(id);
+      await loadPayList();
+      setTotalAmount(totalAmount);
     } catch (err) {
       console.error(err);
     }
@@ -235,6 +254,14 @@ export default function PayList() {
                 )}
               </tbody>
             </table>
+            <div className="flex justify-end items-center bg-gray-50 border-t p-4">
+              <h3 className="text-xl font-semibold text-gray-800">
+                Total (Active Entries):{" "}
+                <span className="text-green-600">
+                  ${totalAmount.toFixed(2)}
+                </span>
+              </h3>
+            </div>
           </div>
         )}
       </div>

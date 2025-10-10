@@ -32,9 +32,6 @@ export const createPayList = async (req, res) => {
   }
 };
 
-// @desc    Soft delete / restore a pay list entry
-// @route   PATCH /api/paylist/:id/toggle-delete
-// @access  Private (Admin)
 export const togglePayListDelete = async (req, res) => {
   try {
     const entry = await PayList.findById(req.params.id);
@@ -43,11 +40,23 @@ export const togglePayListDelete = async (req, res) => {
     entry.isDeleted = !entry.isDeleted;
     const updatedEntry = await entry.save();
 
-    res.json(updatedEntry);
+    // Get latest total after toggle
+    const result = await PayList.aggregate([
+      { $match: { isDeleted: false } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const totalAmount = result[0]?.total || 0;
+
+    res.json({
+      message: "Entry updated successfully",
+      updatedEntry,
+      totalAmount,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Delete pay list entry permanently
 // @route   DELETE /api/paylist/:id
@@ -59,6 +68,23 @@ export const deletePayList = async (req, res) => {
 
     await entry.deleteOne();
     res.json({ message: "Entry permanently deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get total amount of non-deleted entries
+// @route   GET /api/paylist/total
+// @access  Public
+export const getTotalAmount = async (req, res) => {
+  try {
+    const result = await PayList.aggregate([
+      { $match: { isDeleted: false } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    const totalAmount = result[0]?.total || 0;
+    res.json({ totalAmount });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

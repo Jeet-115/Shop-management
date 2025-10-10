@@ -27,3 +27,8 @@ export const togglePayListDeleteApi = async (id) => {
 export const deletePayListApi = async (id) => {
   await axiosInstance.delete(`/api/paylist/${id}`);
 };
+
+export const fetchTotalAmountApi = async () => {
+  const { data } = await axiosInstance.get("/api/paylist/total");
+  return data; // returns { totalAmount: number }
+};
