@@ -11,6 +11,13 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
       },
     ],
+    status: {
+      type: String,
+      enum: ["pending", "verified", "sent"],
+      default: "pending",
+    },
+    verifiedBy: { type: String }, // admin email or ID
+    sentAt: { type: Date },
   },
   { timestamps: true }
 );

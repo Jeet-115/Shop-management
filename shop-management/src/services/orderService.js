@@ -35,3 +35,8 @@ export const updateItemQuantity = async (itemId, quantity) => {
   });
   return data;
 };
+
+export const verifyAndSendOrder = async (orderId) => {
+  const { data } = await axiosInstance.post(`/api/orders/verify-and-send/${orderId}`);
+  return data;
+};

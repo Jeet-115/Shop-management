@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaUsersCog, FaClipboardList, FaArrowLeft } from "react-icons/fa";
+import {
+  FaUsersCog,
+  FaClipboardList,
+  FaArrowLeft,
+  FaCheckCircle,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import AdminManagement from "../components/AdminManagement";
 import OrderHistory from "../components/OrderHistory";
+import OrderConfirmation from "../components/OrderConfirmation";
 import LogoutButton from "../components/LogoutButton";
 
 export default function AdminDashboard() {
@@ -13,13 +19,21 @@ export default function AdminDashboard() {
 
   const tabs = [
     { id: "management", label: "Management", icon: <FaUsersCog size={18} /> },
-    { id: "orders", label: "Order History", icon: <FaClipboardList size={18} /> },
+    {
+      id: "confirmation",
+      label: "Order Confirmation",
+      icon: <FaCheckCircle size={18} />,
+    },
+    {
+      id: "orders",
+      label: "Order History",
+      icon: <FaClipboardList size={18} />,
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-3 sm:py-10 sm:px-4">
       <div className="max-w-6xl mx-auto bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
-        
         {/* Title with Back + Logout Buttons */}
         <motion.div
           className="flex items-center justify-between mb-6 sm:mb-8"
@@ -81,6 +95,18 @@ export default function AdminDashboard() {
               className="overflow-x-auto"
             >
               <AdminManagement />
+            </motion.div>
+          )}
+          {activeTab === "confirmation" && (
+            <motion.div
+              key="confirmation"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-x-auto"
+            >
+              <OrderConfirmation />
             </motion.div>
           )}
           {activeTab === "orders" && (

@@ -74,7 +74,7 @@ export default function Order() {
   }, []);
 
   const afterOrderPlaced = () => {
-    setAlertModalMessage("Order placed successfully!");
+    setAlertModalMessage("Order sent for verification successfully!");
     setAlertModalTitle("Success");
     setAlertModalOpen(true);
 
